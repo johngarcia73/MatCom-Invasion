@@ -1,4 +1,10 @@
 #include"shoot.h"
+#include"player.h"
+#include"enemies.h"
+#include"map.h"
+
+struct shoot shoots[100];
+int shootsNumber = sizeof(shoots)/sizeof(shoots[0]);
 
 void generateShoot()
 {
@@ -72,7 +78,6 @@ void* manageShoot(void * thr)
                 shoots[i].y = shoots[i].y - 1;
                 if(shoots[i].y < 0) shoots[i].active = 0;
             }
-            
         }
 
         pthread_mutex_lock(&lock);

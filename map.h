@@ -5,11 +5,12 @@
 #include<ncurses.h>
 #include<unistd.h>
 #include<stdbool.h>
+#include"control.h"
+
+#pragma once
 
 #define largoMapa 181
 #define anchoMapa 41
-const char enemy = (char)208;
-
 
 struct tile
 {
@@ -26,14 +27,37 @@ struct position
     int y;
 };
 
-struct position options[2];
-int option = 0;
-int optionsNumber = sizeof(options)/sizeof(options[0]);
+struct ship
+{
+    int x;
+    int y;
+    int lifes;
+    int munition;
+};
 
-struct tile space[anchoMapa][largoMapa];
-char map[anchoMapa][largoMapa];
-int positionCounter = 0;
+extern struct ship player;
+
+extern struct position shipPositions[8];
+extern int playerPositionsNumber;
+
+
+extern const char enemy;
+
+extern pthread_mutex_t lock;
+extern pthread_mutex_t shootLock;
+
+extern struct position options[2];
+extern int option;
+extern int optionsNumber;
+
+extern struct tile space[anchoMapa][largoMapa];
+extern char map[anchoMapa][largoMapa];
+extern int positionCounter;
 
 
 int* positionGen(int number);       //Generates 'number' random positions.
 void cleanPosition(int x, int y);
+void drawLifes();
+void damageLife();
+void drawPlayer();
+void drawGround();

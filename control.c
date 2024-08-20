@@ -1,5 +1,10 @@
 #include"control.h"
 
+pthread_t threads[100];
+bool usingThread[100];
+int threadPointer = 0;
+bool restart = false;
+
 void killAll()
 {
     for (int i = 1; i <= threadPointer; i++)
@@ -9,5 +14,3 @@ void killAll()
     }
     threadPointer = 0;
 }
-
-bool restart = false;

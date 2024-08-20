@@ -6,17 +6,15 @@
 #include<termios.h>
 #include<stdbool.h>
 #include<locale.h>
-#include"control.c"
-#include"map.c"
-#include"menu.c"
-#include"enemies.c"
-#include"player.c"
-#include"shoot.c"
-#include"game.c"
-#include"key.c"
-#include"shootListener.c"
-#include"draw.c"
-#include"init.c"
+#include"control.h"
+#include"map.h"
+#include"menu.h"
+#include"enemies.h"
+#include"player.h"
+#include"shoot.h"
+#include"game.h"
+#include"key.h"
+#include"init.h"
 
 
 int main(int argc, char const *argv[])
@@ -40,6 +38,8 @@ int main(int argc, char const *argv[])
     init_pair(4, COLOR_GREEN, COLOR_GREEN);
     init_pair(5, COLOR_WHITE, COLOR_BLACK); 
     init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_color(COLOR_YELLOW, 404, 268, 132);
+    init_pair(7, COLOR_YELLOW, COLOR_YELLOW);
     
     while (1)
     {    

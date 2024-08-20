@@ -1,26 +1,10 @@
 #include"player.h"
 
+struct ship player;
 
-void drawPlayer()
-{
-    int x = player.x;
-    int y = player.y;
+struct position shipPositions[8];
+int playerPositionsNumber = sizeof(shipPositions)/sizeof(shipPositions[0]);
 
-    pthread_mutex_lock(&lock);
-
-    attron(COLOR_PAIR(1));
-
-    for (int i = 0; i < playerPositionsNumber; i++)
-    {
-        mvaddch(y + shipPositions[i].y, x + shipPositions[i].x, ' ');
-    }
-    attroff(COLOR_PAIR(1));
-    
-    refresh();
-
-    pthread_mutex_unlock(&lock);
-
-}
 
 void drawMunition()
 {
@@ -43,19 +27,10 @@ void erasePlayer()
     
     for (int i = 0; i < playerPositionsNumber; i++)
     {
+        space[y + shipPositions[i].y][x + shipPositions[i].x].occupiedByPlayer = false;
         mvaddch(y + shipPositions[i].y, x + shipPositions[i].x, ' ');
     }
     attroff(COLOR_PAIR(3));
-    refresh();
-    pthread_mutex_unlock(&lock);
-}
-
-void drawLifes()
-{
-    pthread_mutex_lock(&lock);
-    attron(COLOR_PAIR(5));
-    mvprintw(anchoMapa + 2, 1, "Lifes: %d", player.lifes);
-    attroff(COLOR_PAIR(5));
     refresh();
     pthread_mutex_unlock(&lock);
 }
@@ -68,18 +43,11 @@ void setPlayer()
         if(space[player.y + shipPositions[i].y][player.x + shipPositions[i].x].enemyId != -1)
         {
             destroyEnemy(player.x + shipPositions[i].x, player.y + shipPositions[i].y);
+
             damageLife();
-        } 
+        }
+        space[player.y + shipPositions[i].y][player.x + shipPositions[i].x].occupiedByPlayer = true;
     }
-}
-
-void damageLife()
-{
-    player.lifes --;
-
-    drawLifes();
-
-    if(player.lifes <= 0) restart = true;
 }
 
 void movePlayer(int direction)

@@ -1,5 +1,26 @@
 #include"enemies.h"
-#include<time.h>
+
+struct enemy enemies[10];
+
+int numberOfEnemies = sizeof(enemies)/sizeof(enemies[0]);
+struct position enemyPosLv1[16];                                            
+int enemyPositionsNumber = sizeof(enemyPosLv1)/sizeof(enemyPosLv1[0]);
+int numberEnemiesSpawned = 0;
+int numberEnemiesDefeated = 0;
+int cap = 0;       
+
+bool aliveEnemies[8];
+
+struct position positionsToSpawnLV1[2];
+struct position positionsToSpawnLV2[4];
+struct position positionsToSpawnLV3[6];
+struct position positionsToSpawnLV4[8];
+
+struct position spawnPositions[4];
+int spwansNumber = sizeof(spawnPositions)/sizeof(spawnPositions[0]);
+int levelSpawnsNumber;
+int last = -1;     
+
 
 int isOccupiedByEnemy(int x, int y)     //Generalizable, it is possible to return another value for other objects, i.e. return 2 if it is occupied by player.
 {
@@ -40,7 +61,26 @@ void enemiesInit()
     default:
         break;
     }
+
     numberEnemiesSpawned = 0;
+
+    switch (level)
+    {
+    case 1:
+        cap = 2;
+        break;
+    case 2:
+        cap = 3;
+        break;
+    case 3:
+        cap = 4;
+        break;
+    case 4:
+        cap = 4;
+        break;
+    default:
+        break;
+    }
 
     srand(time(NULL));              // Initializes enemies properties.
 
@@ -54,7 +94,7 @@ void enemiesInit()
     }
     
 
-    for (int i = 0; i < level *2; i++)
+    for (int i = 0; i < cap; i++)
     {
         enemies[i].coreX = 10;
         enemies[i].coreY = 10;
@@ -62,7 +102,7 @@ void enemiesInit()
         enemies[i].isAlive = 0;
     }
     
-    for (int i = 0; i < level*2; i++)
+    for (int i = 0; i < cap; i++)
     {
         generateEnemy(i);
     }
@@ -79,8 +119,8 @@ void generateEnemy(int index)
 {
     if(numberEnemiesSpawned >= levelSpawnsNumber) return;
 
-    if(last == level * 2 - 1) last = -1;
-    for (int i = last+1; i < level * 2; i++)
+    if(last == cap - 1) last = -1;
+    for (int i = last+1; i < cap; i++)
     {
         if(aliveEnemies[i] == false && canPutEnemy(positionsToSpawnLV4[i].x, 1))
         {
@@ -97,9 +137,9 @@ void generateEnemy(int index)
         }
         
         if(i == last) break;
-        if(i == level*2 - 1 && last == -1) break;
+        if(i == cap - 1 && last == -1) break;
 
-        if(i == level* 2 -1) i = -1;
+        if(i == cap -1) i = -1;
     }
 }
 
@@ -110,7 +150,8 @@ void* enemiesManagment(void* thr)           // Manages the enemies movement.
         generateEnemy(0);    
 
         pthread_mutex_lock(&lock);
-        for (int j = 0; j < level * 2; j++)
+
+        for (int j = 0; j < cap; j++)
         {
             if(enemies[j].index == -1 || enemies[j].isAlive == 0) continue;
             moveEnemy(j, down);
@@ -120,7 +161,7 @@ void* enemiesManagment(void* thr)           // Manages the enemies movement.
         }
         pthread_mutex_unlock(&lock);
         if(restart == true) pthread_exit(NULL);
-        napms(800);
+        napms(1000);
     }
 }
 
@@ -147,11 +188,27 @@ void setEnemy(struct enemy e)
 {
     int x = e.coreX;
     int y = e.coreY;
+
     
     for (int i = 0; i < enemyPositionsNumber; i++)        // The positions of an enemy.
     {
+        if(space[y + enemyPosLv1[i].y][x + enemyPosLv1[i].x].occupiedByPlayer)
+        {
+            space[y + enemyPosLv1[i].y][x + enemyPosLv1[i].x].enemyId = e.index;
+            pthread_mutex_unlock(&lock);
+            destroyEnemy(x + enemyPosLv1[i].x, y + enemyPosLv1[i].y);
+            drawPlayer();
+            damageLife();
+            pthread_mutex_lock(&lock);
+            return;
+        } 
+    }
+
+    for (int i = 0; i < enemyPositionsNumber; i++)
+    {
         space[y + enemyPosLv1[i].y][x + enemyPosLv1[i].x].enemyId = e.index;
     }
+
 }
 
 void moveEnemy(int enemyId, int direction)
@@ -193,6 +250,8 @@ void drawEnemy(struct enemy e)
 {
     //pthread_mutex_lock(&lock);
 
+    if(e.isAlive == 0) return;
+    
     attron(COLOR_PAIR(4));
     for (int i = 0; i < enemyPositionsNumber; i++)        // The positions of an enemy.
     {
@@ -226,17 +285,16 @@ void destroyEnemy(int x, int y)                     // Cleans an enemy and set i
     int coreY = e.coreY;
 
     aliveEnemies[index] = false;
-    
-    pthread_mutex_lock(&lock);
 
+    pthread_mutex_lock(&lock);
+    
     attron(COLOR_PAIR(3));
     for (int i = 0; i < enemyPositionsNumber; i++)        // The positions of an enemy.
     {
         mvaddch(coreY + enemyPosLv1[i].y, coreX + enemyPosLv1[i].x, ' ');
         space[coreY + enemyPosLv1[i].y][coreX + enemyPosLv1[i].x].enemyId = -1;
     }
-    
-    
+
     attroff(COLOR_PAIR(3));
     refresh();
     pthread_mutex_unlock(&lock);
@@ -275,16 +333,11 @@ void assignSpawnPos()
 
     positionsToSpawnLV1[0].x = positionsToSpawnLV2[0].x = positionsToSpawnLV3[0].x = positionsToSpawnLV4[0].x  = 71;
     positionsToSpawnLV1[1].x = positionsToSpawnLV2[1].x = positionsToSpawnLV3[1].x = positionsToSpawnLV4[1].x  = 111;
-    positionsToSpawnLV2[2].x = positionsToSpawnLV3[2].x = positionsToSpawnLV4[2].x = 51;
-    positionsToSpawnLV2[3].x = positionsToSpawnLV3[3].x = positionsToSpawnLV4[3].x = 131;
+    positionsToSpawnLV2[2].x = positionsToSpawnLV3[2].x = positionsToSpawnLV4[2].x = 41;
+    positionsToSpawnLV2[3].x = positionsToSpawnLV3[3].x = positionsToSpawnLV4[3].x = 141;
     positionsToSpawnLV3[4].x = positionsToSpawnLV4[4].x = 31;
     positionsToSpawnLV3[5].x = positionsToSpawnLV4[5].x = 151;
     positionsToSpawnLV4[6].x = 11;
     positionsToSpawnLV4[7].x = 171;
 }
 
-
-void enemyLand(struct enemy e)
-{
-    if(e.coreY >= anchoMapa - 1) endGame();
-}

@@ -1,5 +1,7 @@
 #define shootDelay 250
 
+#pragma once
+
 struct shoot
 {
     int x;
@@ -7,8 +9,8 @@ struct shoot
     int active;
 };
 
-struct shoot shoots[100];
-int shootsNumber = sizeof(shoots)/sizeof(shoots[0]);
+extern struct shoot shoots[100];
+extern int shootsNumber;
 
 
 void generateShoot();       //Generates a shoot in fornt of the player by pressing 'Space'.

@@ -1,8 +1,5 @@
 #include"game.h"
 
-void game();
-
-
 void game()
 {   
     level = 1;
@@ -27,7 +24,7 @@ void game()
         {
             if(restart)
             { 
-                napms(1000);
+                napms(1100);
                 killAll();
                 restart = false;
 
@@ -39,11 +36,4 @@ void game()
     }
 
     //clear();
-}
-
-void endGame()
-{
-    killAll();
-    restart = true;
-    return;
 }

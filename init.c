@@ -1,3 +1,5 @@
+#include"init.h"
+
 void init()   //Initializes the map with start positions.
 {
     clear();
@@ -17,6 +19,7 @@ void init()   //Initializes the map with start positions.
 
     player.x = (int)largoMapa/2;
     player.y = anchoMapa - 3;
+    setPlayer();
     player.lifes = 3;
     player.munition = maxMunition;
     
@@ -41,9 +44,10 @@ void init()   //Initializes the map with start positions.
     numberEnemiesSpawned = 0;
     numberEnemiesDefeated = 0;
 
+
     drawLifes();
     drawPlayer();
     drawMunition();
-
+    drawGround();
 }
 

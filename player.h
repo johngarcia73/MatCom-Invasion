@@ -1,22 +1,12 @@
-struct ship
-{
-    int x;
-    int y;
-    int lifes;
-    int munition;
-};
+#include"enemies.h"
+#include"map.h"
 
-struct ship player;
+#pragma once
 
-struct position shipPositions[8];
-int playerPositionsNumber = sizeof(shipPositions)/sizeof(shipPositions[0]);
 
-#define maxMunition 20
+#define maxMunition 10
 
-void drawPlayer();
 void setPlayer();
 void erasePlayer();
-void damageLife();
 void drawMunition();
-void drawLifes();
 void movePlayer(int direction);

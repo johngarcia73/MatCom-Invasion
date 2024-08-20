@@ -1,5 +1,8 @@
 #include"menu.h"
 
+int level = 1;
+bool nextLevel= false;
+
 void mainMenu()
 {
     options[0].x = largoMapa/4;
