@@ -102,6 +102,12 @@ void enemiesInit()
         enemies[i].index = 0;
         enemies[i].isAlive = 0;
     }
+
+    for (int i = 0; i < sizeof(defeatedEnemiesPerPos)/sizeof(defeatedEnemiesPerPos[0]); i++)
+    {
+        defeatedEnemiesPerPos[i] = 0;
+    }
+    
     
     for (int i = 0; i < cap; i++)
     {
@@ -320,6 +326,13 @@ void destroyEnemy(int x, int y)                     // Cleans an enemy and set i
 
     defeatedEnemiesPerPos[index] ++;
 
+    pthread_mutex_lock(&lock);
+    attron(COLOR_PAIR(5));
+    mvprintw(anchoMapa + 2, 110, "TEST %d, %d, %d, %d", defeatedEnemiesPerPos[0], defeatedEnemiesPerPos[1], defeatedEnemiesPerPos[2], defeatedEnemiesPerPos[3]);
+    attroff(COLOR_PAIR(5));
+    refresh();
+    pthread_mutex_unlock(&lock);
+
     if(numberEnemiesDefeated >= levelSpawnsNumber)      // Change of Level
     {
         level++;
@@ -335,7 +348,7 @@ void enemyLv2Ability(struct enemy e)
     int min = maxEnemiesNumber + 1;
     int index = 0;
 
-    for (int i = 0; i < posNumber; i++)
+    for (int i = 0; i < cap; i++)
     {
         if(defeatedEnemiesPerPos[i] < min)
         {
@@ -343,6 +356,11 @@ void enemyLv2Ability(struct enemy e)
             index = i;
         }  
     }
+
+    attron(COLOR_PAIR(5));
+    mvprintw(anchoMapa + 2, 70, "TEST: %d, %d", min, index);
+    attroff(COLOR_PAIR(5));
+    refresh();
 
     if(canPutEnemy(positionsToSpawnLV4[index].x ,e.coreY))
     {
