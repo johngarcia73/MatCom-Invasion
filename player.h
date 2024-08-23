@@ -4,7 +4,7 @@
 #pragma once
 
 
-#define maxMunition 10
+#define maxMunition 6
 
 void setPlayer();
 void erasePlayer();

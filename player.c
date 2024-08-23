@@ -11,7 +11,7 @@ void drawMunition()
     pthread_mutex_lock(&lock);
 
     attron(COLOR_PAIR(5));
-    mvprintw(anchoMapa + 2, 30, "Munition: %d       ", player.munition);
+    mvprintw(anchoMapa + 2, 31, "Munition: %d       ", player.munition);
     attroff(COLOR_PAIR(5));
     refresh();
     pthread_mutex_unlock(&lock);

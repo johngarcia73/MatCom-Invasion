@@ -46,6 +46,7 @@ void init()   //Initializes the map with start positions.
 
 
     drawLifes();
+    drawLevel();
     drawPlayer();
     drawMunition();
     drawGround();

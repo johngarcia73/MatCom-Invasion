@@ -55,9 +55,13 @@ extern char map[anchoMapa][largoMapa];
 extern int positionCounter;
 
 
+extern int level;
+extern bool nextLevel;
+
 int* positionGen(int number);       //Generates 'number' random positions.
 void cleanPosition(int x, int y);
 void drawLifes();
 void damageLife();
 void drawPlayer();
 void drawGround();
+void drawLevel();

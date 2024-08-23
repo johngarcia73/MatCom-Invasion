@@ -40,6 +40,7 @@ int main(int argc, char const *argv[])
     init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
     init_color(COLOR_YELLOW, 404, 268, 132);
     init_pair(7, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(8, COLOR_CYAN, COLOR_CYAN);
     
     while (1)
     {    

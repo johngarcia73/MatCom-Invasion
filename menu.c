@@ -1,7 +1,5 @@
 #include"menu.h"
 
-int level = 1;
-bool nextLevel= false;
 
 void mainMenu()
 {

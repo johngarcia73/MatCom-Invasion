@@ -6,9 +6,6 @@
 
 #pragma once
 
-extern int level;
-extern bool nextLevel;
-
 void select2();
 void mainMenu();
 void drawOptions();

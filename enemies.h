@@ -14,6 +14,8 @@ struct enemy
     int coreY;
     int isAlive;
     int index;
+    int level;
+    bool abilityUsed;
 };
 
 #define left 0
@@ -28,6 +30,7 @@ extern struct position enemyPosLv1[16];                                         
 extern int enemyPositionsNumber;
 extern int numberEnemiesSpawned;
 extern int numberEnemiesDefeated;
+extern int defeatedEnemiesPerPos[8];                // Number of enemies defeated from each spawn position
 extern int cap;        // Number of current level spawn positions
 
 
@@ -59,3 +62,5 @@ bool canPutEnemy(int x, int y);
 void moveEnemy(int enemyId, int direction);
 void assignenemyPos();
 void assignSpawnPos();
+void enemyLv2Ability(struct enemy e);
+void teleportEnemy(int index, int x, int y);

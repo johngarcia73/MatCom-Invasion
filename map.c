@@ -13,6 +13,9 @@ struct tile space[anchoMapa][largoMapa];
 char map[anchoMapa][largoMapa];
 int positionCounter = 0;
 
+int level = 1;
+bool nextLevel= false;
+
 void drawPlayer()
 {
     int x = player.x;
@@ -71,7 +74,7 @@ void drawGround()
     pthread_mutex_lock(&lock);
 
     attron(COLOR_PAIR(7));
-    for (int i = 0; i < largoMapa; i++)
+    for (int i = 0; i < largoMapa + 3; i++)
     {
         for (int j = anchoMapa+1; j > anchoMapa - 2; j--)
         {
@@ -82,5 +85,15 @@ void drawGround()
     attroff(COLOR_PAIR(7));
     refresh();
     
+    pthread_mutex_unlock(&lock);
+}
+
+void drawLevel()
+{
+    pthread_mutex_lock(&lock);
+    attron(COLOR_PAIR(5));
+    mvprintw(anchoMapa + 2, 61, "Level: %d", level);
+    attroff(COLOR_PAIR(5));
+    refresh();
     pthread_mutex_unlock(&lock);
 }
