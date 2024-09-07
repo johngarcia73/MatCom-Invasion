@@ -19,6 +19,6 @@ void* reload(void * th)
             drawMunition();
         }
         if(restart == true) pthread_exit(NULL);
-        sleep(3);
+        napms(2000);
     }
 }

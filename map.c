@@ -13,8 +13,10 @@ struct tile space[anchoMapa][largoMapa];
 char map[anchoMapa][largoMapa];
 int positionCounter = 0;
 
+const int totalLevels = 4; 
 int level = 1;
 bool nextLevel= false;
+bool winner = false;
 
 void drawPlayer()
 {

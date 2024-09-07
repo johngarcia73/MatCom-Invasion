@@ -1,9 +1,9 @@
 #include"game.h"
 
 void game()
-{   
+{       
     level = 1;
-    
+
     while(1)
     {
         init();
@@ -31,9 +31,14 @@ void game()
                 break;
             }
         }
-        if(!nextLevel) break;
+        if(!nextLevel || level >= totalLevels) break;
         nextLevel = false;
     }
 
+    if(level >= totalLevels && winner)
+    {
+        nextLevel = false;
+        winnerScreen();
+    }
     //clear();
 }

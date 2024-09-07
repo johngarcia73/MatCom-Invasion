@@ -41,6 +41,8 @@ int main(int argc, char const *argv[])
     init_color(COLOR_YELLOW, 404, 268, 132);
     init_pair(7, COLOR_YELLOW, COLOR_YELLOW);
     init_pair(8, COLOR_CYAN, COLOR_CYAN);
+    init_color(COLOR_YELLOW + 1, 1000, 500, 0);
+    init_pair(9, COLOR_YELLOW + 1,COLOR_YELLOW + 1);
     
     while (1)
     {    

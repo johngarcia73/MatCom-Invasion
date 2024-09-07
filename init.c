@@ -2,6 +2,7 @@
 
 void init()   //Initializes the map with start positions.
 {
+    winner = false;
     clear();
     
     for (int i = 0; i < anchoMapa; i++)

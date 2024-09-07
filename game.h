@@ -6,4 +6,3 @@
 #include"munition.h"
 #include"init.h"
 
-void game();

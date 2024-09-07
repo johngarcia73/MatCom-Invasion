@@ -1,4 +1,5 @@
 #include"menu.h"
+#include<string.h>
 
 
 void mainMenu()
@@ -53,7 +54,11 @@ void select2()
     {
         game();
     }
-    if(option == 1) exit(0);
+    if(option == 1)
+    {
+        endwin();
+        exit(0);
+    } 
 }
 
 void drawOptions()
@@ -99,9 +104,141 @@ void drawTitle()
     pthread_mutex_lock(&lock);
 
     attron(COLOR_PAIR(6));
-    mvprintw(2, largoMapa/2 - 7, "MATCOM INVASION");
+    //mvprintw(2, largoMapa/2 - 7, "MATCOM INVASION");
+    char *text = "MATCOM INVASION";
+    draw_text(5, 5, text);
     attroff(COLOR_PAIR(6));
     refresh();
     pthread_mutex_unlock(&lock);
 
+}
+
+        //  Drawing the Title
+
+void draw_char(int y, int x, char ch) {
+    switch (ch) {
+        case 'M':
+            mvprintw(y, x, "###   ###");
+            mvprintw(y+1, x, "#### ####");
+            mvprintw(y+2, x, "## ### ##");
+            mvprintw(y+3, x, "##  #  ##");
+            mvprintw(y+4, x, "##     ##");
+            break;
+        case 'A':
+            mvprintw(y, x, "  ###  ");
+            mvprintw(y+1, x, " ##### ");
+            mvprintw(y+2, x, "##   ##");
+            mvprintw(y+3, x, "#######");
+            mvprintw(y+4, x, "##   ##");
+            break;
+        case 'T':
+            mvprintw(y, x, "#######");
+            mvprintw(y+1, x, "   ##   ");
+            mvprintw(y+2, x, "   ##   ");
+            mvprintw(y+3, x, "   ##   ");
+            mvprintw(y+4, x, "   ##   ");
+            break;
+        case 'C':
+            mvprintw(y, x, " #####");
+            mvprintw(y+1, x, "##    ");
+            mvprintw(y+2, x, "##    ");
+            mvprintw(y+3, x, "##    ");
+            mvprintw(y+4, x, " #####");
+            break;
+        case 'O':
+            mvprintw(y, x, " ##### ");
+            mvprintw(y+1, x, "##   ##");
+            mvprintw(y+2, x, "##   ##");
+            mvprintw(y+3, x, "##   ##");
+            mvprintw(y+4, x, " ##### ");
+            break;
+        case 'I':
+            mvprintw(y, x, "#####");
+            mvprintw(y+1, x, "  ## ");
+            mvprintw(y+2, x, "  ## ");
+            mvprintw(y+3, x, "  ## ");
+            mvprintw(y+4, x, "#####");
+            break;
+        case 'N':
+            mvprintw(y, x, "##   ##");
+            mvprintw(y+1, x, "###  ##");
+            mvprintw(y+2, x, "## # ##");
+            mvprintw(y+3, x, "##  ###");
+            mvprintw(y+4, x, "##   ##");
+            break;
+        case 'V':
+            mvprintw(y, x, "##     ##");
+            mvprintw(y+1, x, "##     ##");
+            mvprintw(y+2, x, " ##   ## ");
+            mvprintw(y+3, x, "  ## ##  ");
+            mvprintw(y+4, x, "   ###   ");
+            break;
+        case 'S':
+            mvprintw(y, x, " #####");
+            mvprintw(y+1, x, "##    ");
+            mvprintw(y+2, x, " #####");
+            mvprintw(y+3, x, "    ##");
+            mvprintw(y+4, x, "##### ");
+            break;
+        case 'W':
+            mvprintw(y, x, "# #  #");
+            mvprintw(y+1, x, "# #  #");
+            mvprintw(y+2, x, "# #  #");
+            mvprintw(y+3, x, "# #  #");
+            mvprintw(y+4, x, " #####");
+            break;
+        case 'U':
+            mvprintw(y, x, "##  ##");
+            mvprintw(y+1, x, "##  ##");
+            mvprintw(y+2, x, "##  ##");
+            mvprintw(y+3, x, "######");
+            mvprintw(y+4, x, " #### ");
+            break;
+
+        case 'Y':
+            mvprintw(y, x, "##  ##");
+            mvprintw(y+1, x, " ## ## ");
+            mvprintw(y+2, x, "  ## ");
+            mvprintw(y+3, x, "  ##  ");
+            mvprintw(y+4, x, "  ##  ");
+            break;
+
+        default:
+            break;
+    }
+}
+
+void draw_text(int start_y, int start_x, const char *text) {
+    int spacing = 2; // Espacio entre letras
+
+    for (int i = 0; i < strlen(text); ++i) {
+        if (text[i] != ' ') {
+            draw_char(start_y, start_x + i * (9 + spacing), text[i]);
+        }
+    }
+}
+
+void winnerScreen()
+{
+    clear();
+    
+    attron(COLOR_PAIR(6));
+    char *text = "YOU WIN";
+    draw_text(10, 10, text);
+    attroff(COLOR_PAIR(6));
+    attron(COLOR_PAIR(5));
+    mvprintw(30, 10, "Press spacebar to go back to menu...");
+    attroff(COLOR_PAIR(5));
+    refresh();
+
+    int key;
+
+    while(1)
+    {
+        key = getch();
+        
+        pthread_mutex_unlock(&lock);
+        
+        if(key == 32) break;
+    }
 }

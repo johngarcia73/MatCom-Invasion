@@ -82,7 +82,7 @@ void enemiesInit()
     default:
         break;
     }
-
+    
     srand(time(NULL));              // Initializes enemies properties.
 
     assignenemyPos();
@@ -252,7 +252,7 @@ void moveEnemy(int enemyId, int direction)
         setEnemy(enemies[enemyId]);
         break;
     case 3:
-        if(y + 1 > anchoMapa - 2) restart = true;
+        if(y + 1 > anchoMapa - 4) restart = true;
         if(!canPutEnemy(x, y + 3)) break;
         enemies[enemyId].coreY += 1;
         setEnemy(enemies[enemyId]);
@@ -276,6 +276,7 @@ void drawEnemy(struct enemy e)
         if(i == 6 || i == 7)
         {
             attron(COLOR_PAIR(1));
+            if(e.level == 2) attron(COLOR_PAIR(9));
             mvaddch(e.coreY + enemyPosLv1[i].y, e.coreX + enemyPosLv1[i].x, ' ');
             attroff(COLOR_PAIR(1));
 
@@ -326,15 +327,9 @@ void destroyEnemy(int x, int y)                     // Cleans an enemy and set i
 
     defeatedEnemiesPerPos[index] ++;
 
-    pthread_mutex_lock(&lock);
-    attron(COLOR_PAIR(5));
-    mvprintw(anchoMapa + 2, 110, "TEST %d, %d, %d, %d", defeatedEnemiesPerPos[0], defeatedEnemiesPerPos[1], defeatedEnemiesPerPos[2], defeatedEnemiesPerPos[3]);
-    attroff(COLOR_PAIR(5));
-    refresh();
-    pthread_mutex_unlock(&lock);
-
     if(numberEnemiesDefeated >= levelSpawnsNumber)      // Change of Level
     {
+        winner = true;
         level++;
         nextLevel = true;
         restart = true;
@@ -356,11 +351,6 @@ void enemyLv2Ability(struct enemy e)
             index = i;
         }  
     }
-
-    attron(COLOR_PAIR(5));
-    mvprintw(anchoMapa + 2, 70, "TEST: %d, %d", min, index);
-    attroff(COLOR_PAIR(5));
-    refresh();
 
     if(canPutEnemy(positionsToSpawnLV4[index].x ,e.coreY))
     {

@@ -54,8 +54,9 @@ extern struct tile space[anchoMapa][largoMapa];
 extern char map[anchoMapa][largoMapa];
 extern int positionCounter;
 
-
+extern const int totalLevels; 
 extern int level;
+extern bool winner;
 extern bool nextLevel;
 
 int* positionGen(int number);       //Generates 'number' random positions.
