@@ -11,6 +11,10 @@
 
 #define largoMapa 181
 #define anchoMapa 41
+#define leftLimit 40
+#define rightLimit 140
+#define zoneMarker1 33 + leftLimit
+#define zoneMarker2 66 + leftLimit
 
 struct tile
 {
@@ -18,6 +22,7 @@ struct tile
     int posY;
     int enemyId;
     bool occupiedByPlayer;
+    int shotId;
 };
 
 
@@ -41,7 +46,7 @@ extern struct position shipPositions[8];
 extern int playerPositionsNumber;
 
 
-extern const char enemy;
+extern const char enem;
 
 extern pthread_mutex_t lock;
 extern pthread_mutex_t shootLock;
@@ -66,3 +71,4 @@ void damageLife();
 void drawPlayer();
 void drawGround();
 void drawLevel();
+void draw(int x, int y, char *string, int colorPair);

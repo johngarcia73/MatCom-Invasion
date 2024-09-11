@@ -1,26 +1,28 @@
 #include"enemies.h"
 
-struct enemy enemies[10];
+enemy enemies[20];
 
 int numberOfEnemies = sizeof(enemies)/sizeof(enemies[0]);
-struct position enemyPosLv1[16];                                            
+struct position enemyPosLv1[11];     
+struct position enemyPosLv3[9];  
+struct position enemyPosBoss[83];                                            // Positions around the core that occupies the final boss.
+
 int enemyPositionsNumber = sizeof(enemyPosLv1)/sizeof(enemyPosLv1[0]);
 int numberEnemiesSpawned = 0;
 int numberEnemiesDefeated = 0;
 int cap = 0;       
 
-int defeatedEnemiesPerPos[8];   
+int defeatedEnemiesPerZone[3];   
 bool aliveEnemies[8];
 
-struct position positionsToSpawnLV1[2];
-struct position positionsToSpawnLV2[4];
-struct position positionsToSpawnLV3[6];
 struct position positionsToSpawnLV4[8];
 
 struct position spawnPositions[4];
 int spwansNumber = sizeof(spawnPositions)/sizeof(spawnPositions[0]);
 int levelSpawnsNumber;
-int last = -1;     
+int last = -1;
+
+int bossLife = 40;
 
 
 int isOccupiedByEnemy(int x, int y)     //Generalizable, it is possible to return another value for other objects, i.e. return 2 if it is occupied by player.
@@ -29,83 +31,96 @@ int isOccupiedByEnemy(int x, int y)     //Generalizable, it is possible to retur
     return 1;
 }
 
-bool canPutEnemy(int x, int y)
+bool canPutEnemy(int x, int y, int level)
 {
-    if(x<2 || x>=largoMapa-3) return false;                 
-    for (int i = 0; i < enemyPositionsNumber; i++)
+    int positionsNumber = 11;
+    if(level == 3) positionsNumber = 9;
+
+    if(x<leftLimit || x>rightLimit) return false;                 
+    for (int i = 0; i < positionsNumber; i++)
     {
-        if (isOccupiedByEnemy(x + enemyPosLv1[i].x, y + enemyPosLv1[i].y)) return false;
+        if(level == 3)
+        {
+            if (isOccupiedByEnemy(x + enemyPosLv3[i].x, y + enemyPosLv3[i].y)) return false;
+
+        }
+        else if(level == 4)
+        {
+            if(isOccupiedByEnemy(x + enemyPosBoss[i].x, y + enemyPosBoss[i].y)) return false;
+        }
+        else
+        {
+            if(isOccupiedByEnemy(x + enemyPosLv1[i].x, y + enemyPosLv1[i].y)) return false;
+        }
     }
     return true;      
 }
 
 void enemiesInit()
 {
-
     switch (level)
     {
     case 1:
-        levelSpawnsNumber = 6;
+        levelSpawnsNumber = 12;
         break;
     
     case 2:
-        levelSpawnsNumber = 12;
+        levelSpawnsNumber = 23;
         break;
 
     case 3:
-        levelSpawnsNumber = 16;
+        levelSpawnsNumber = 28;
         break;
-
     case 4:
-        levelSpawnsNumber = 22;
+        levelSpawnsNumber = 34;
+        break;
+    case 5:
+        levelSpawnsNumber = 1000000;
         break;
     default:
         break;
     }
 
+    numberEnemiesDefeated = 0;
     numberEnemiesSpawned = 0;
 
     switch (level)
     {
     case 1:
-        cap = 2;
+        cap = 5;
         break;
     case 2:
-        cap = 3;
+        cap = 6;
         break;
     case 3:
-        cap = 4;
+        cap = 6;
         break;
     case 4:
-        cap = 4;
-        break;
+        cap = 7;    
+        break;      
+    case 5:
+        cap = 11;    
+        break;     
     default:
         break;
     }
-    
-    srand(time(NULL));              // Initializes enemies properties.
+
+    bossLife = 20;
+    srand(time(NULL));
 
     assignenemyPos();
 
-    assignSpawnPos();
-
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < numberOfEnemies; i++)
     {
-        aliveEnemies[i] = false;
-    }
-    
-
-    for (int i = 0; i < cap; i++)
-    {
-        enemies[i].coreX = 10;
-        enemies[i].coreY = 10;
+        enemies[i].coreX = 0;
+        enemies[i].coreY = 0;
         enemies[i].index = 0;
         enemies[i].isAlive = 0;
     }
 
-    for (int i = 0; i < sizeof(defeatedEnemiesPerPos)/sizeof(defeatedEnemiesPerPos[0]); i++)
+    for (int i = 0; i < zonesNumber; i++)
     {
-        defeatedEnemiesPerPos[i] = 0;
+        defeatedEnemiesPerZone[i] = 0;
     }
     
     
@@ -114,43 +129,109 @@ void enemiesInit()
         generateEnemy(i);
     }
 
-    threadPointer += 1;
-    usingThread[threadPointer] = true;
-    int auxThreadPointer = threadPointer;
-
-    pthread_create(&threads[threadPointer], NULL, enemiesManagment, NULL);
+    createThread(enemiesManagment);
     //pthread_join(threads[auxThreadPointer], NULL);
 }
 
 void generateEnemy(int index)
 {
-    if(numberEnemiesSpawned >= levelSpawnsNumber) return;
-
-    if(last == cap - 1) last = -1;
-    for (int i = last+1; i < cap; i++)
+    if(level == 5 && numberEnemiesSpawned == 0)
     {
-        if(aliveEnemies[i] == false && canPutEnemy(positionsToSpawnLV4[i].x, 1))
+    
+        enemies[7].level = 4;
+        enemies[7].coreX = 83;
+        enemies[7].coreY = 2;
+        enemies[7].isAlive = 1;
+        enemies[7].index = 7;
+        enemies[7].shotCooldown = 10;
+        enemies[7].movementDirection = left;
+        enemies[7].positionsArray = enemyPosBoss;
+        enemies[7].positionsNumber = sizeof(enemyPosBoss)/sizeof(enemyPosBoss[0]);
+        numberEnemiesSpawned ++;
+        draw(132, anchoMapa + 3, "Captain Eggplant", 5);
+        setEnemy(enemies[7]);
+        drawEnemy(enemies[7]);
+    
+    
+        return;
+    }
+    
+    if(level >= 3 && numberEnemiesSpawned == 0 && level != 5)
+    {
+        for (int i = cap; i < cap + level + 2; i++)
         {
-            enemies[i].level = 1;
-            if(numberEnemiesDefeated > 0 && numberEnemiesDefeated%3 == 0) enemies[i].level = 2;
-            enemies[i].coreX = positionsToSpawnLV4[i].x;
+            if(enemies[i].isAlive == 1) continue;
+
+            int x;
+            do
+            {
+                x = rand()%rightLimit + leftLimit;
+            }while(!canPutEnemy(x, 1, 3));
+
+            enemies[i].level = 3;
+            enemies[i].coreX = x;
             enemies[i].coreY = 1;
             enemies[i].isAlive = 1;
-            enemies[i].abilityUsed = false;
             enemies[i].index = i;
-            aliveEnemies[i] = true;
+            enemies[i].shotCooldown = 2;
+            enemies[i].movementDirection = left;
+            enemies[i].positionsArray = enemyPosLv3;
+            enemies[i].positionsNumber = sizeof(enemyPosLv3)/sizeof(enemyPosLv3[0]);
+
+            if(x <= zoneMarker1) enemies[i].zone = 0;
+            else if(x <= zoneMarker2) enemies[i].zone = 1;
+            else enemies[i].zone = 2;
+            numberEnemiesSpawned++;
             setEnemy(enemies[i]);
             drawEnemy(enemies[i]);
-            numberEnemiesSpawned++;
-            last = i;
-            break;
         }
-        
-        if(i == last) break;
-        if(i == cap - 1 && last == -1) break;
-
-        if(i == cap -1) i = -1;
     }
+
+    if(numberEnemiesSpawned >= levelSpawnsNumber) return;
+
+    int spawnPosY = 4;
+    if(level == 5) spawnPosY = 8;
+    for (int i = 0; i < cap; i++)
+    {
+        
+        if(enemies[i].isAlive == 1) continue;
+
+        int x;
+        do
+        {
+            x = rand()%rightLimit + leftLimit;
+        }while(!canPutEnemy(x, spawnPosY, 1));
+
+        enemies[i].level = 1;
+        enemies[i].coreX = x;
+        enemies[i].coreY = spawnPosY;
+        enemies[i].isAlive = 1;
+        enemies[i].index = i;
+        enemies[i].shotCooldown = 2;
+        enemies[i].movementDirection = down;
+        enemies[i].positionsArray = enemyPosLv1;
+        enemies[i].positionsNumber = sizeof(enemyPosLv1)/sizeof(enemyPosLv1[0]);
+
+        if(x <= zoneMarker1) enemies[i].zone = 0;
+        else if(x <= zoneMarker2) enemies[i].zone = 1;
+        else enemies[i].zone = 2;
+        
+        if(level >= 2 && numberEnemiesSpawned%3 == 0 && numberEnemiesSpawned > 0) enemies[i].level = 2; 
+        numberEnemiesSpawned++;
+        setEnemy(enemies[i]);
+        drawEnemy(enemies[i]);
+    }
+}
+
+int genRandTeleportPosition(int leftBorder, int rightBorder, enemy e)
+{
+    int x;
+    do
+    {
+        x = rand()%rightBorder + leftBorder;
+    }while(!canPutEnemy(x, e.coreY + 1, e.level));
+
+    return x;
 }
 
 void* enemiesManagment(void* thr)           // Manages the enemies movement.
@@ -159,30 +240,46 @@ void* enemiesManagment(void* thr)           // Manages the enemies movement.
     {
         generateEnemy(0);    
 
+        
         pthread_mutex_lock(&lock);
 
-        for (int j = 0; j < cap; j++)
+        for (int j = 0; j < numberOfEnemies; j++)
         {
-            if(enemies[j].index == -1 || enemies[j].isAlive == 0) continue;
-            if(enemies[j].level == 2 && enemies[j].coreY >= 13 && !enemies[j].abilityUsed)
+            enemy *e = &enemies[j];
+
+            if(e->index == -1 || e->isAlive == 0) continue;
+            if(e->level == 2 && e->coreY%6 == 0 && e->coreY <= 25)
             {
                 enemyLv2Ability(enemies[j]);
             }
+            else if(e->level == 4)
+            {
+                if(e->shotCooldown == 0){generateBossShoot(e->index, e->coreX, e->coreY); e->shotCooldown = 10;}
+                else(e->shotCooldown --);
+                moveBoss(*e);
+            }
             else
             {
-                moveEnemy(j, down);
+                if(e->level == 3)
+                {
+                    if(e->shotCooldown == 0){enemyLv3Ability(*e); e->shotCooldown = 3;}
+                    else(e->shotCooldown --);
+                }
+                moveEnemy(j, e->movementDirection);
             }
             
-            drawEnemy(enemies[j]);
+            drawEnemy(*e);
         }
         refresh();
         pthread_mutex_unlock(&lock);
+        
         if(restart == true) pthread_exit(NULL);
-        napms(333);
+        
+        napms(500);
     }
 }
 
-void cleanEnemy(struct enemy e)             // Cleans an enemy out of the screen.
+void cleanEnemy(enemy e)             // Cleans an enemy out of the screen.
 {
     int ex = e.coreX;
     int ey = e.coreY;
@@ -190,10 +287,10 @@ void cleanEnemy(struct enemy e)             // Cleans an enemy out of the screen
     //pthread_mutex_lock(&lock);
     
     attron(COLOR_PAIR(3));
-    for (int i = 0; i < enemyPositionsNumber; i++)        // The positions of an enemy.
+    for (int i = 0; i < e.positionsNumber; i++)        // The positions of an enemy.
     {
-        mvaddch(ey + enemyPosLv1[i].y, ex + enemyPosLv1[i].x, ' ');
-        space[ey + enemyPosLv1[i].y][ex + enemyPosLv1[i].x].enemyId = -1;
+        mvaddch(ey + e.positionsArray[i].y, ex + e.positionsArray[i].x, ' ');
+        space[ey + e.positionsArray[i].y][ex + e.positionsArray[i].x].enemyId = -1;
     }
     
     attroff(COLOR_PAIR(3));
@@ -201,18 +298,18 @@ void cleanEnemy(struct enemy e)             // Cleans an enemy out of the screen
     //pthread_mutex_unlock(&lock);
 }
 
-void setEnemy(struct enemy e)
+void setEnemy(enemy e)
 {
     int x = e.coreX;
     int y = e.coreY;
 
-    for (int i = 0; i < enemyPositionsNumber; i++)        // The positions of an enemy.
+    for (int i = 0; i < e.positionsNumber; i++)        // The positions of an enemy.
     {
-        if(space[y + enemyPosLv1[i].y][x + enemyPosLv1[i].x].occupiedByPlayer)
+        if(space[y + e.positionsArray[i].y][x + e.positionsArray[i].x].occupiedByPlayer)
         {
-            space[y + enemyPosLv1[i].y][x + enemyPosLv1[i].x].enemyId = e.index;
+            space[y + e.positionsArray[i].y][x + e.positionsArray[i].x].enemyId = e.index;
             pthread_mutex_unlock(&lock);
-            destroyEnemy(x + enemyPosLv1[i].x, y + enemyPosLv1[i].y);
+            destroyEnemy(x + e.positionsArray[i].x, y + e.positionsArray[i].y);
             drawPlayer();
             damageLife();
             pthread_mutex_lock(&lock);
@@ -220,71 +317,119 @@ void setEnemy(struct enemy e)
         }
     }
 
-    for (int i = 0; i < enemyPositionsNumber; i++)
+    for (int i = 0; i < e.positionsNumber; i++)
     {
-        space[y + enemyPosLv1[i].y][x + enemyPosLv1[i].x].enemyId = e.index;
+        space[y + e.positionsArray[i].y][x + e.positionsArray[i].x].enemyId = e.index;
     }
 
 }
 
 void moveEnemy(int enemyId, int direction)
 {
-    cleanEnemy(enemies[enemyId]);
-    int x = enemies[enemyId].coreX;
-    int y = enemies[enemyId].coreY;
+    enemy *e = &enemies[enemyId];
+    cleanEnemy(*e);
+    int x = e->coreX;
+    int y = e->coreY;
 
 
     switch (direction)
     {
     case 0:
-        if(x - 1 < 2 || !canPutEnemy(x - 1, y)) break;
-        enemies[enemyId].coreX += -1;
-        setEnemy(enemies[enemyId]);
+        if(!canPutEnemy(x - 3, y, e->level))
+        {
+            if(e->level == 3 || e->level == 4) e->movementDirection = right;
+            break;
+        }
+        e->coreX += -3;
         break;
     case 1:
-        if(x + 1 > largoMapa - 3 || !canPutEnemy(x + 1, y)) break;
-        enemies[enemyId].coreX += 1;
-        setEnemy(enemies[enemyId]);
+        if(x + 3 > largoMapa - 3 || !canPutEnemy(x + 3, y, e->level))
+        {
+            if(e->level == 3 || e->level == 4) e->movementDirection = left;
+            break;
+        }
+        e->coreX += 3;
         break;
     case 2:
-        if(y - 1 < 1 || !canPutEnemy(x, y - 1)) break;
-        enemies[enemyId].coreY += -1;
-        setEnemy(enemies[enemyId]);
+        if(y - 1 < 1 || !canPutEnemy(x, y - 1, e->level)) break;
+        e->coreY += -1;
         break;
     case 3:
         if(y + 1 > anchoMapa - 4) restart = true;
-        if(!canPutEnemy(x, y + 3)) break;
-        enemies[enemyId].coreY += 1;
-        setEnemy(enemies[enemyId]);
+        if(!canPutEnemy(x, y + 1, e->level)) break;
+        e->coreY += 1;
         break;
     default:
         break;
     }
+    setEnemy(*e);
 }
 
-void drawEnemy(struct enemy e)
+void moveBoss(enemy boss)
+{
+    enemy *e = &enemies[boss.index];
+    int index = e->index;
+    cleanEnemy(*e);
+
+    if(e->movementDirection == left)
+    {
+        if(e->coreX - 5 <= leftLimit || !canPutEnemy(e->coreX - 5, e->coreY, e->level)) e->movementDirection = right;
+    }
+    else if(e->movementDirection == right)
+    {
+        if(e->coreX + 20 >= rightLimit || !canPutEnemy(e->coreX + 20, e->coreY, e->level)) e->movementDirection = left;
+    }
+
+    if(e->movementDirection == left) enemies[index].coreX = enemies[index].coreX - 5;
+    if(e->movementDirection == right) enemies[index].coreX = enemies[index].coreX + 5;
+
+    setEnemy(enemies[index]);
+}
+
+void drawEnemy(enemy e)
 {
     //pthread_mutex_lock(&lock);
 
     if(e.isAlive == 0) return;
     
-    attron(COLOR_PAIR(4));
-    if(e.level == 2) attron(COLOR_PAIR(8));
+    if(e.level == 2) attron(COLOR_PAIR(8)); else if(e.level == 1) attron(COLOR_PAIR(4)); else attron(COLOR_PAIR(10)); 
 
-    for (int i = 0; i < enemyPositionsNumber; i++)        // The positions of an enemy.
+    if(e.level == 4)
     {
-        if(i == 6 || i == 7)
+        for (int i = 0; i < e.positionsNumber; i++)        // The positions of an enemy.
+        {   
+            
+            if(i > 74) attron(COLOR_PAIR(11));
+            else if(i == 17 || i == 18 || i == 27 || i == 26 || i == 32 || i == 33) attron(COLOR_PAIR(13));
+            else attron(COLOR_PAIR(12));
+            mvaddch(e.coreY + e.positionsArray[i].y, e.coreX + e.positionsArray[i].x, ' ');
+            if(i > 74) attron(COLOR_PAIR(11));
+            else if(i == 17 || i == 18 || i == 28 || i == 29 || i == 32 || i == 33 || i == 43 || i == 44) attron(COLOR_PAIR(13));
+            else attron(COLOR_PAIR(12));
+        }   
+        return;
+    }
+    for (int i = 0; i < e.positionsNumber; i++)        // The positions of an enemy.
+    {
+        if(e.level < 3 && (i == 8 || i == 10))
         {
-            attron(COLOR_PAIR(1));
-            if(e.level == 2) attron(COLOR_PAIR(9));
-            mvaddch(e.coreY + enemyPosLv1[i].y, e.coreX + enemyPosLv1[i].x, ' ');
-            attroff(COLOR_PAIR(1));
+            if(e.level == 2)
+            {
+                attron(COLOR_PAIR(9));
+                mvaddch(e.coreY + e.positionsArray[i].y, e.coreX + e.positionsArray[i].x, ' ');
+                attroff(COLOR_PAIR(9));
+            }
+            else if(e.level == 1)
+            {
+                attron(COLOR_PAIR(1));
+                mvaddch(e.coreY + e.positionsArray[i].y, e.coreX + e.positionsArray[i].x, ' ');
+                attroff(COLOR_PAIR(1));
+            }
 
-            attron(COLOR_PAIR(4));
-            if(e.level == 2) attron(COLOR_PAIR(8));
+            if(e.level == 2) attron(COLOR_PAIR(8)); else if(e.level == 1) attron(COLOR_PAIR(4)); else attron(COLOR_PAIR(10)); 
             continue;
         }    
-        mvaddch(e.coreY + enemyPosLv1[i].y, e.coreX + enemyPosLv1[i].x, ' ');
+        mvaddch(e.coreY + e.positionsArray[i].y, e.coreX + e.positionsArray[i].x, ' ');
     }
     if(e.level == 2) attroff(COLOR_PAIR(8));
     attroff(COLOR_PAIR(4));
@@ -297,37 +442,37 @@ void destroyEnemy(int x, int y)                     // Cleans an enemy and set i
 {
     //if(space[y][x].occupierEnemy == NULL) return;
 
-    //struct enemy * e = space[y][x].occupierEnemy;
+    //enemy * e = space[y][x].occupierEnemy;
     //int coreX = e->coreX;
     //int coreY = e->coreY;
     
     int index = space[y][x].enemyId;
-    struct enemy e = enemies[index];
+    enemy e = enemies[index];
     int coreX = e.coreX;
     int coreY = e.coreY;
 
+    if(e.level == 4 && bossLife >= 1)
+    {
+        damageBossLife();
+        
+        if(bossLife != 0) return;
+    }
     aliveEnemies[index] = false;
 
-    pthread_mutex_lock(&lock);
-    
-    attron(COLOR_PAIR(3));
-    for (int i = 0; i < enemyPositionsNumber; i++)        // The positions of an enemy.
+    for (int i = 0; i < e.positionsNumber; i++)        // The positions of an enemy.
     {
-        mvaddch(coreY + enemyPosLv1[i].y, coreX + enemyPosLv1[i].x, ' ');
-        space[coreY + enemyPosLv1[i].y][coreX + enemyPosLv1[i].x].enemyId = -1;
+        draw(coreX + e.positionsArray[i].x, coreY + e.positionsArray[i].y, " ", 3);
+        space[coreY + e.positionsArray[i].y][coreX + e.positionsArray[i].x].enemyId = -1;
     }
-
-    attroff(COLOR_PAIR(3));
-    refresh();
-    pthread_mutex_unlock(&lock);
 
     enemies[index].isAlive = 0;
 
     numberEnemiesDefeated ++;
+    
 
-    defeatedEnemiesPerPos[index] ++;
+    defeatedEnemiesPerZone[e.zone] ++;
 
-    if(numberEnemiesDefeated >= levelSpawnsNumber)      // Change of Level
+    if(numberEnemiesDefeated >= levelSpawnsNumber || bossLife == 0)      // Change of Level
     {
         winner = true;
         level++;
@@ -337,29 +482,42 @@ void destroyEnemy(int x, int y)                     // Cleans an enemy and set i
 
 }
 
-void enemyLv2Ability(struct enemy e)
+void enemyLv2Ability(enemy e)
 {
-    int posNumber = sizeof(defeatedEnemiesPerPos)/sizeof(defeatedEnemiesPerPos[0]);
     int min = maxEnemiesNumber + 1;
     int index = 0;
 
-    for (int i = 0; i < cap; i++)
+    for (int i = 0; i < zonesNumber; i++)
     {
-        if(defeatedEnemiesPerPos[i] < min)
+        if(defeatedEnemiesPerZone[i] < min)
         {
-            min = defeatedEnemiesPerPos[i];
+            min = defeatedEnemiesPerZone[i];
             index = i;
         }  
     }
 
-    if(canPutEnemy(positionsToSpawnLV4[index].x ,e.coreY))
+    int x;
+    switch (index)
     {
-        teleportEnemy(e.index, positionsToSpawnLV4[index].x + 2 ,e.coreY);
+    case 0:
+        x = genRandTeleportPosition(leftLimit, zoneMarker1, e);
+        break;
+    case 1:
+        x = genRandTeleportPosition(zoneMarker1, zoneMarker2, e);
+        break;
+    case 2:
+        x = genRandTeleportPosition(zoneMarker2, rightLimit, e);
+        break;    
+    default:
+        break;
     }
-    else
-    {
-        teleportEnemy(e.index, positionsToSpawnLV4[index].x ,e.coreY);
-    }
+
+    teleportEnemy(e.index, x, e.coreY + 1);
+}
+
+void enemyLv3Ability(enemy e)
+{
+    generateShoot(e.index);
 }
 
 void teleportEnemy(int index, int x, int y)
@@ -377,30 +535,61 @@ void teleportEnemy(int index, int x, int y)
 
 void assignenemyPos()
 {
-    enemyPosLv1[0].x = enemyPosLv1[1].y = enemyPosLv1[1].y = enemyPosLv1[2].y = enemyPosLv1[3].y = enemyPosLv1[4].y = enemyPosLv1[5].x = enemyPosLv1[9].x = enemyPosLv1[13].x = 0;
-    enemyPosLv1[1].x = enemyPosLv1[6].x = /*enemyPosLv1[8].y =*/ enemyPosLv1[9].y = enemyPosLv1[10].x = /*enemyPosLv1[10].y =*/ enemyPosLv1[11].y = enemyPosLv1[12].y = 1;
-    enemyPosLv1[2].x = enemyPosLv1[5].y = enemyPosLv1[6].y = enemyPosLv1[7].x = enemyPosLv1[7].y = enemyPosLv1[8].x = -1;
-    enemyPosLv1[3].x = enemyPosLv1[11].x = enemyPosLv1[14].x = /*enemyPosLv1[13].y = enemyPosLv1[14].y = enemyPosLv1[15].y =*/ 2;
-    enemyPosLv1[4].x = enemyPosLv1[12].x = enemyPosLv1[15].x = -2;
+    // Level 1 and 2 enemy positions
+    enemyPosLv1[0].x = enemyPosLv1[6].x = enemyPosLv1[9].x = 0;
+    enemyPosLv1[2].x = enemyPosLv1[10].x = 1;
+    enemyPosLv1[8].x = enemyPosLv1[1].x = -1;
+    enemyPosLv1[7].x = enemyPosLv1[4].x = 2;
+    enemyPosLv1[3].x = enemyPosLv1[5].x = -2;
 
-    enemyPosLv1[8].y = enemyPosLv1[10].y = enemyPosLv1[13].y = enemyPosLv1[14].y = enemyPosLv1[15].y = 0;   //Correction.
-    enemyPosLv1[8].x = enemyPosLv1[10].x = enemyPosLv1[13].x = enemyPosLv1[14].x = enemyPosLv1[15].x = 0;
+    enemyPosLv1[0].y = enemyPosLv1[1].y = enemyPosLv1[2].y = enemyPosLv1[3].y = enemyPosLv1[4].y = 0;
+    enemyPosLv1[5].y = enemyPosLv1[6].y = enemyPosLv1[7].y = 1;
+    enemyPosLv1[8].y = enemyPosLv1[9].y = enemyPosLv1[10].y = -1;
+
+
+    // Level 3 enemy positions
+    
+    enemyPosLv3[0].x = enemyPosLv3[7].x = enemyPosLv3[5].x = 0;
+    enemyPosLv3[2].x = enemyPosLv3[8].x = 1;
+    enemyPosLv3[6].x = enemyPosLv3[1].x = -1;
+    enemyPosLv3[4].x = 2;
+    enemyPosLv3[3].x = -2;
+
+    enemyPosLv3[0].y = enemyPosLv3[1].y = enemyPosLv3[2].y = enemyPosLv3[3].y = enemyPosLv3[4].y = 0;
+    enemyPosLv3[5].y = 1;
+    enemyPosLv3[6].y = enemyPosLv3[7].y = enemyPosLv3[8].y = -1;
+
+    // Boss positions
+
+    int column = 0;
+
+    for (int i = 0; i < 75; i++)
+    {
+        enemyPosBoss[i].x = i%15;
+        if(i < 15)enemyPosBoss[i].y = 0;
+        else if(i < 30)enemyPosBoss[i].y = 1;
+        else if(i < 45)enemyPosBoss[i].y = 2;
+        else if(i < 60)enemyPosBoss[i].y = 3;
+        else if(i < 75)enemyPosBoss[i].y = 4;
+    }
+
+    enemyPosBoss[75].y = enemyPosBoss[76].y = enemyPosBoss[77].y = enemyPosBoss[78].y = enemyPosBoss[79].y = -1;
+    enemyPosBoss[80].y = enemyPosBoss[81].y = enemyPosBoss[82].y = -2;
+
+    enemyPosBoss[75].x = enemyPosBoss[80].x = 5;
+    enemyPosBoss[76].x = 6;
+    enemyPosBoss[77].x = enemyPosBoss[81].x = 7;
+    enemyPosBoss[78].x = 8;
+    enemyPosBoss[79].x = enemyPosBoss[82].x = 9;
 }
 
-void assignSpawnPos()
+void damageBossLife()
 {
-    positionsToSpawnLV1[0].y = positionsToSpawnLV1[1].y = positionsToSpawnLV2[0].y = positionsToSpawnLV2[1].y = positionsToSpawnLV2[2].y = positionsToSpawnLV2[3].y =
-    positionsToSpawnLV3[0].y = positionsToSpawnLV3[1].y = positionsToSpawnLV3[2].y = positionsToSpawnLV3[3].y =positionsToSpawnLV3[4].y = positionsToSpawnLV3[5].y =
-    positionsToSpawnLV4[0].y = positionsToSpawnLV4[1].y =positionsToSpawnLV4[2].y = positionsToSpawnLV4[3].y =positionsToSpawnLV4[4].y = positionsToSpawnLV4[5].y =
-    positionsToSpawnLV4[6].y = positionsToSpawnLV4[7].y = 1; 
-
-    positionsToSpawnLV1[0].x = positionsToSpawnLV2[0].x = positionsToSpawnLV3[0].x = positionsToSpawnLV4[0].x  = 71;
-    positionsToSpawnLV1[1].x = positionsToSpawnLV2[1].x = positionsToSpawnLV3[1].x = positionsToSpawnLV4[1].x  = 111;
-    positionsToSpawnLV2[2].x = positionsToSpawnLV3[2].x = positionsToSpawnLV4[2].x = 41;
-    positionsToSpawnLV2[3].x = positionsToSpawnLV3[3].x = positionsToSpawnLV4[3].x = 141;
-    positionsToSpawnLV3[4].x = positionsToSpawnLV4[4].x = 31;
-    positionsToSpawnLV3[5].x = positionsToSpawnLV4[5].x = 151;
-    positionsToSpawnLV4[6].x = 11;
-    positionsToSpawnLV4[7].x = 171;
+    bossLife --;
+    
+    for (int i = 130; i < 150; i++)
+    {
+        if(i < 130 + bossLife) draw(i, anchoMapa + 2, " ", 12);
+        else draw(i, anchoMapa + 2, " ", 3);
+    }
 }
-

@@ -4,17 +4,20 @@
 
 struct shoot
 {
+    int shotId;
     int x;
     int y;
     int active;
+    int shooterId;
 };
 
-extern struct shoot shoots[100];
+extern struct shoot shoots[200];
 extern int shootsNumber;
 
 
-void generateShoot();       //Generates a shoot in fornt of the player by pressing 'Space'.
+void generateShoot(int shooterId);      // Generates a shot from respectiveenemy's id, from player if -1
 void* manageShoot(void * thr);
 void drawShoot(struct shoot s);
 void addShoot(struct shoot s);
 void shootsInit();
+void generateBossShoot(int enemyId, int x, int y);

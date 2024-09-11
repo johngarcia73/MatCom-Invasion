@@ -2,10 +2,7 @@
 
 void munition()
 {
-    threadPointer += 1;
-    usingThread[threadPointer] = true;
-    int auxThreadPointer = threadPointer;
-    pthread_create(&threads[threadPointer], NULL, reload, NULL);
+    createThread(reload);
     //pthread_join(threads[auxThreadPointer], NULL);
 }
 

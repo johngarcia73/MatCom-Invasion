@@ -10,52 +10,37 @@ void* keyListener(void* t)
 
         key = getch();
         flushinp();
-        switch (key)
-        {
-            case KEY_LEFT:
-                if (player.x > 2)
-                {
-                    pthread_mutex_unlock(&lock);
-                    erasePlayer();
-                    movePlayer(left);
-                    drawPlayer();
-                }
-                break;
-            case KEY_RIGHT:
-                if (player.x < largoMapa - 3)
-                {
-                    pthread_mutex_unlock(&lock);
-                    erasePlayer();
-                    movePlayer(right);
-                    drawPlayer();
-                }
-                break;
-            case KEY_UP:
-                if (player.y > 1)
-                {   
-                    pthread_mutex_unlock(&lock);
-                    erasePlayer();
-                    movePlayer(up);
-                    drawPlayer();
-                }
-                break;
-            case KEY_DOWN:    
-                if (player.y < anchoMapa - 2)
-                {
-                    pthread_mutex_unlock(&lock);
-                    erasePlayer();
-                    movePlayer(down);
-                    drawPlayer();
-                }
-                break;
-            case 32:
-                pthread_mutex_unlock(&lock);
-                if(player.munition > 0 && player.y > 1) generateShoot();
-                break;
 
-            default:
-                pthread_mutex_unlock(&lock);
-                break;    
+        pthread_mutex_unlock(&lock);
+
+        if(key == 32)
+        {
+            if(player.munition > 0 && player.y > 1) generateShoot(-1);
+        }
+        else
+        {
+            switch (key)
+            {
+                case KEY_LEFT:
+                    erasePlayer();
+                    if (player.x > 2) movePlayer(left);
+                    break;
+                case KEY_RIGHT:
+                    erasePlayer();
+                    if (player.x < largoMapa - 3) movePlayer(right);
+                    break;
+                case KEY_UP:
+                    erasePlayer();
+                    if (player.y > 1) movePlayer(up);
+                    break;
+                case KEY_DOWN:
+                    erasePlayer();
+                    if (player.y < anchoMapa - 2) movePlayer(down);
+                    break;
+                default:
+                    break;    
+            }
+            drawPlayer();
         }
 
         if(restart == true) pthread_exit(NULL);

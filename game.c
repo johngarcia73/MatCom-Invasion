@@ -14,16 +14,13 @@ void game()
 
         munition();
 
-        threadPointer += 1;
-        int auxThreadPointer = threadPointer;
-        usingThread[threadPointer] = true;
-        pthread_create(&threads[threadPointer], NULL, keyListener, NULL);
-        //pthread_join(threads[auxThreadPointer], NULL);
+        createThread(keyListener);
         
         while (1)
         {
             if(restart)
             { 
+                play = false;
                 napms(1100);
                 killAll();
                 restart = false;
@@ -31,7 +28,7 @@ void game()
                 break;
             }
         }
-        if(!nextLevel || level >= totalLevels) break;
+        if(!nextLevel || level > totalLevels) break;
         nextLevel = false;
     }
 

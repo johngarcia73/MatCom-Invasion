@@ -14,3 +14,10 @@ void killAll()
     }
     threadPointer = 0;
 }
+
+void createThread(void * function)
+{
+    threadPointer += 1;
+    usingThread[threadPointer] = true;
+    pthread_create(&threads[threadPointer], NULL, function, NULL);
+}

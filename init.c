@@ -14,8 +14,30 @@ void init()   //Initializes the map with start positions.
             t.posY = i;
             t.enemyId = -1;
             t.occupiedByPlayer = false;
+            t.shotId = -1;
             space[i][j] = t;
         }
+    }
+
+    switch (level)
+    {
+    case 1:
+        maxMunition = 18;
+        break;
+    case 2:
+        maxMunition = 26;
+        break;
+    case 3:
+        maxMunition = 35;
+        break;
+    case 4:
+        maxMunition = 44;
+        break;
+    case 5:
+        maxMunition = 50;
+        break;
+    default:
+        break;
     }
 
     player.x = (int)largoMapa/2;
@@ -40,11 +62,7 @@ void init()   //Initializes the map with start positions.
     shipPositions[6].x = 2;
     shipPositions[6].y = 1;
     shipPositions[7].x = -2;
-    shipPositions[7].y = 1; 
-    
-    numberEnemiesSpawned = 0;
-    numberEnemiesDefeated = 0;
-
+    shipPositions[7].y = 1;
 
     drawLifes();
     drawLevel();

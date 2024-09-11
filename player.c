@@ -2,6 +2,7 @@
 
 struct ship player;
 
+int maxMunition;
 struct position shipPositions[8];
 int playerPositionsNumber = sizeof(shipPositions)/sizeof(shipPositions[0]);
 

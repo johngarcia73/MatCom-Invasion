@@ -9,3 +9,4 @@ extern int threadPointer;
 extern bool restart;
 
 void killAll();
+void createThread();

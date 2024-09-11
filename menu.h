@@ -1,8 +1,10 @@
 #include<stdbool.h>
 #include<pthread.h>
 #include<ncurses.h>
+#include<string.h>
 #include"map.h"
 #include"control.h"
+#include"audio.h"
 
 #pragma once
 

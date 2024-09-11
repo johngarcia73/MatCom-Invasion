@@ -1,6 +1,4 @@
 #include"menu.h"
-#include<string.h>
-
 
 void mainMenu()
 {
@@ -24,12 +22,9 @@ void select2()
     {
         key = getch();
         
-        pthread_mutex_unlock(&lock);
-        
+        pthread_mutex_unlock(&lock);        
 
         erasePointer();
-
-        
         
         switch (key)
         {
@@ -113,7 +108,6 @@ void drawTitle()
 
 }
 
-        //  Drawing the Title
 
 void draw_char(int y, int x, char ch) {
     switch (ch) {
@@ -181,11 +175,11 @@ void draw_char(int y, int x, char ch) {
             mvprintw(y+4, x, "##### ");
             break;
         case 'W':
-            mvprintw(y, x, "# #  #");
-            mvprintw(y+1, x, "# #  #");
-            mvprintw(y+2, x, "# #  #");
-            mvprintw(y+3, x, "# #  #");
-            mvprintw(y+4, x, " #####");
+            mvprintw(y, x, "## ##  ##");
+            mvprintw(y+1, x, "## ##  ##");
+            mvprintw(y+2, x, "## ##  ##");
+            mvprintw(y+3, x, "## ##  ##");
+            mvprintw(y+4, x, "#########");
             break;
         case 'U':
             mvprintw(y, x, "##  ##");
